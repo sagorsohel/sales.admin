@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { X, FolderPlus, Sparkles } from "lucide-react";
+import { X, FolderPlus } from "lucide-react";
 import { setCategoryModalOpen } from "../store/slices/uiSlice";
-import { addCategory, updateCategory } from "../store/slices/categoriesSlice";
+import {
+  createCategoryApi,
+  updateCategoryApi,
+} from "../store/slices/categoriesSlice";
 
 const availableIcons = ["📁", "☁️", "🧠", "🛡️", "⚡", "📊", "🌐", "🛍️", "🔧", "💻"];
 
@@ -14,6 +17,7 @@ export function CategoryModal() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [icon, setIcon] = useState("📁");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (editingCategory) {
@@ -29,33 +33,39 @@ export function CategoryModal() {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) {
       alert("Please enter a category name");
       return;
     }
 
-    if (editingCategory) {
-      dispatch(
-        updateCategory({
-          id: editingCategory.id,
-          name: name.trim(),
-          description: description.trim(),
-          icon,
-        })
-      );
-    } else {
-      dispatch(
-        addCategory({
-          name: name.trim(),
-          description: description.trim(),
-          icon,
-        })
-      );
+    setSubmitting(true);
+    try {
+      if (editingCategory) {
+        await dispatch(
+          updateCategoryApi({
+            id: editingCategory.id,
+            name: name.trim(),
+            description: description.trim(),
+            icon,
+          })
+        ).unwrap();
+      } else {
+        await dispatch(
+          createCategoryApi({
+            name: name.trim(),
+            description: description.trim(),
+            icon,
+          })
+        ).unwrap();
+      }
+      dispatch(setCategoryModalOpen(false));
+    } catch (err) {
+      alert("Failed to save category: " + err);
+    } finally {
+      setSubmitting(false);
     }
-
-    dispatch(setCategoryModalOpen(false));
   };
 
   return (
@@ -67,7 +77,7 @@ export function CategoryModal() {
               <FolderPlus className="w-4 h-4" />
             </div>
             <h3 className="font-bold text-white text-base">
-              {editingCategory ? "Edit Category" : "Create New Category"}
+              {editingCategory ? "Edit Category in MySQL" : "Create New Category in MySQL"}
             </h3>
           </div>
           <button
@@ -131,6 +141,7 @@ export function CategoryModal() {
           <div className="pt-4 border-t border-[#1f293d] flex justify-end gap-3">
             <button
               type="button"
+              disabled={submitting}
               onClick={() => dispatch(setCategoryModalOpen(false))}
               className="px-4 py-2 rounded-lg bg-[#151f32] text-gray-300 text-sm font-medium hover:bg-[#1b2740] transition-colors"
             >
@@ -138,9 +149,10 @@ export function CategoryModal() {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold shadow-md shadow-blue-500/30 transition-all"
+              disabled={submitting}
+              className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-semibold shadow-md shadow-blue-500/30 transition-all"
             >
-              {editingCategory ? "Update Category" : "Save Category"}
+              {submitting ? "Saving..." : editingCategory ? "Update in MySQL" : "Save to MySQL"}
             </button>
           </div>
         </form>

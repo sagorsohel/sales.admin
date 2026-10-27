@@ -15,12 +15,16 @@ export function DashboardView() {
   const products = useSelector((state) => state.products.items);
   const orders = useSelector((state) => state.orders.items);
 
-  const totalRevenue = orders.reduce((sum, o) => sum + (o.amount || 0), 0);
-  const totalStock = products.reduce((sum, p) => sum + (p.stock || 0), 0);
+  const totalRevenue = orders.reduce(
+    (sum, o) => sum + (Number(o.totalAmount || o.amount) || 0),
+    0
+  );
+  const totalStock = products.reduce((sum, p) => sum + (Number(p.stock) || 0), 0);
 
   // Group by category
   const categoryStats = products.reduce((acc, p) => {
-    acc[p.category] = (acc[p.category] || 0) + 1;
+    const cat = p.category || "General";
+    acc[cat] = (acc[cat] || 0) + 1;
     return acc;
   }, {});
 
@@ -118,10 +122,12 @@ export function DashboardView() {
                       <div className="text-[11px] text-gray-400">{order.email}</div>
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-300">
-                      {order.product}
+                      {Array.isArray(order.items) && order.items[0]?.name
+                        ? order.items[0].name
+                        : order.product || "Standard Package"}
                     </td>
                     <td className="px-4 py-3 font-bold text-white">
-                      ${order.amount}
+                      ${order.totalAmount || order.amount || 0}
                     </td>
                     <td className="px-4 py-3">
                       <span

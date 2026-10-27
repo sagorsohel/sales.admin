@@ -1,73 +1,77 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-const initialOrders = [
-  {
-    id: "ORD-9821",
-    customer: "Nexus Digital Corp",
-    email: "billing@nexuscorp.io",
-    product: "Enterprise Cloud Suite Pro",
-    amount: 598,
-    status: "Completed",
-    date: "2026-10-27 10:14",
-  },
-  {
-    id: "ORD-9822",
-    customer: "Vanguard Systems",
-    email: "procurement@vanguard.com",
-    product: "AI Analytics Intelligence Platform",
-    amount: 499,
-    status: "Processing",
-    date: "2026-10-27 08:35",
-  },
-  {
-    id: "ORD-9823",
-    customer: "Apex Fintech Ltd",
-    email: "devops@apexfin.com",
-    product: "Shield Cyber Security Mesh",
-    amount: 547,
-    status: "Completed",
-    date: "2026-10-26 17:50",
-  },
-  {
-    id: "ORD-9824",
-    customer: "Horizon Media Labs",
-    email: "admin@horizonmedia.net",
-    product: "Global Edge Content Delivery",
-    amount: 267,
-    status: "Pending",
-    date: "2026-10-26 14:10",
-  },
-  {
-    id: "ORD-9825",
-    customer: "Starlight SaaS Inc",
-    email: "accounts@starlight.co",
-    product: "Omnichannel Customer Hub",
-    amount: 249,
-    status: "Completed",
-    date: "2026-10-25 11:22",
-  },
-];
+const API_BASE = "http://localhost:5000/api";
+
+// Fetch orders from backend API
+export const fetchOrders = createAsyncThunk(
+  "adminOrders/fetchOrders",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`${API_BASE}/orders`);
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message || "Failed to fetch orders");
+      return json.data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+// Update order status via backend API
+export const updateOrderStatusApi = createAsyncThunk(
+  "adminOrders/updateOrderStatusApi",
+  async ({ id, status }, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`${API_BASE}/orders/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message || "Failed to update order status");
+      return json.data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
 
 export const ordersSlice = createSlice({
   name: "adminOrders",
   initialState: {
-    items: initialOrders,
+    items: [], // 100% dynamic - no static or fallback data
+    loading: false,
+    error: null,
     filterStatus: "All",
   },
   reducers: {
     setFilterStatus: (state, action) => {
       state.filterStatus = action.payload;
     },
-    updateOrderStatus: (state, action) => {
-      const { id, status } = action.payload;
-      const order = state.items.find((o) => o.id === id);
-      if (order) {
-        order.status = status;
-      }
-    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchOrders.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchOrders.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload || [];
+      })
+      .addCase(fetchOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(updateOrderStatusApi.fulfilled, (state, action) => {
+        const idx = state.items.findIndex((o) => o.id === action.payload.id);
+        if (idx !== -1) {
+          state.items[idx] = action.payload;
+        }
+      });
   },
 });
 
-export const { setFilterStatus, updateOrderStatus } = ordersSlice.actions;
+export const { setFilterStatus } = ordersSlice.actions;
 
 export default ordersSlice.reducer;

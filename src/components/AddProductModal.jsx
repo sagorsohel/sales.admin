@@ -13,7 +13,10 @@ import {
   Percent,
 } from "lucide-react";
 import { setAddProductModalOpen } from "../store/slices/uiSlice";
-import { addProduct, updateProduct } from "../store/slices/productsSlice";
+import {
+  createProductApi,
+  updateProductApi,
+} from "../store/slices/productsSlice";
 
 export function AddProductModal() {
   const dispatch = useDispatch();
@@ -157,7 +160,7 @@ export function AddProductModal() {
     setFacilities(facilities.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) {
       alert("Please enter product title");
@@ -186,13 +189,18 @@ export function AddProductModal() {
       icon,
     };
 
-    if (editingProduct) {
-      dispatch(updateProduct({ id: editingProduct.id, ...payload }));
-    } else {
-      dispatch(addProduct(payload));
+    try {
+      if (editingProduct) {
+        await dispatch(
+          updateProductApi({ id: editingProduct.id, ...payload })
+        ).unwrap();
+      } else {
+        await dispatch(createProductApi(payload)).unwrap();
+      }
+      dispatch(setAddProductModalOpen(false));
+    } catch (err) {
+      alert("Failed to save product in MySQL: " + err);
     }
-
-    dispatch(setAddProductModalOpen(false));
   };
 
   return (

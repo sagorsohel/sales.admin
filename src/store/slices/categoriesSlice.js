@@ -1,93 +1,126 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-const initialCategories = [
-  {
-    id: "cat-1",
-    name: "Cloud Solutions",
-    slug: "cloud-solutions",
-    description: "Enterprise cloud orchestration, hosting, and serverless compute infrastructure.",
-    icon: "☁️",
-    createdAt: "2026-01-10T08:00:00Z",
-  },
-  {
-    id: "cat-2",
-    name: "AI & Machine Learning",
-    slug: "ai-machine-learning",
-    description: "Predictive neural networks, automated computer vision, and LLM orchestration.",
-    icon: "🧠",
-    createdAt: "2026-01-12T09:30:00Z",
-  },
-  {
-    id: "cat-3",
-    name: "Cyber Security",
-    slug: "cyber-security",
-    description: "Zero-trust network architecture, penetration testing, and real-time DLP shield.",
-    icon: "🛡️",
-    createdAt: "2026-01-15T11:00:00Z",
-  },
-  {
-    id: "cat-4",
-    name: "Infrastructure & API",
-    slug: "infrastructure-api",
-    description: "Ultra low-latency gateways, telemetry proxies, and edge CDN networks.",
-    icon: "⚡",
-    createdAt: "2026-01-18T14:15:00Z",
-  },
-  {
-    id: "cat-5",
-    name: "Business Operations",
-    slug: "business-operations",
-    description: "Omnichannel customer communication, automated invoice pipelines, and CRM.",
-    icon: "📊",
-    createdAt: "2026-01-20T16:45:00Z",
-  },
-];
+const API_BASE = "http://localhost:5000/api";
+
+// Fetch categories from backend API
+export const fetchCategories = createAsyncThunk(
+  "adminCategories/fetchCategories",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`${API_BASE}/categories`);
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message || "Failed to fetch categories");
+      return json.data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+// Create category via backend API
+export const createCategoryApi = createAsyncThunk(
+  "adminCategories/createCategoryApi",
+  async (categoryData, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`${API_BASE}/categories`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(categoryData),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message || "Failed to create category");
+      return json.data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+// Update category via backend API
+export const updateCategoryApi = createAsyncThunk(
+  "adminCategories/updateCategoryApi",
+  async ({ id, ...updates }, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`${API_BASE}/categories/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message || "Failed to update category");
+      return json.data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+// Delete category via backend API
+export const deleteCategoryApi = createAsyncThunk(
+  "adminCategories/deleteCategoryApi",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`${API_BASE}/categories/${id}`, {
+        method: "DELETE",
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message || "Failed to delete category");
+      return id;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
 
 export const categoriesSlice = createSlice({
   name: "adminCategories",
   initialState: {
-    items: initialCategories,
+    items: [], // 100% dynamic - no static or fallback data
+    loading: false,
+    error: null,
     searchQuery: "",
   },
   reducers: {
     setSearchQuery: (state, action) => {
       state.searchQuery = action.payload;
     },
-    addCategory: (state, action) => {
-      const name = action.payload.name.trim();
-      const slug =
-        action.payload.slug ||
-        name
-          .toLowerCase()
-          .replace(/[^\w\s-]/g, "")
-          .replace(/[\s_-]+/g, "-");
-
-      state.items.unshift({
-        id: `cat-${Date.now()}`,
-        name,
-        slug,
-        description: action.payload.description || "",
-        icon: action.payload.icon || "📁",
-        createdAt: new Date().toISOString(),
+  },
+  extraReducers: (builder) => {
+    // fetchCategories
+    builder
+      .addCase(fetchCategories.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCategories.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload || [];
+      })
+      .addCase(fetchCategories.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
-    },
-    updateCategory: (state, action) => {
-      const index = state.items.findIndex((c) => c.id === action.payload.id);
-      if (index !== -1) {
-        state.items[index] = {
-          ...state.items[index],
-          ...action.payload,
-          updatedAt: new Date().toISOString(),
-        };
+
+    // createCategoryApi
+    builder.addCase(createCategoryApi.fulfilled, (state, action) => {
+      state.items.unshift(action.payload);
+    });
+
+    // updateCategoryApi
+    builder.addCase(updateCategoryApi.fulfilled, (state, action) => {
+      const idx = state.items.findIndex((c) => c.id === action.payload.id);
+      if (idx !== -1) {
+        state.items[idx] = action.payload;
       }
-    },
-    deleteCategory: (state, action) => {
+    });
+
+    // deleteCategoryApi
+    builder.addCase(deleteCategoryApi.fulfilled, (state, action) => {
       state.items = state.items.filter((c) => c.id !== action.payload);
-    },
+    });
   },
 });
 
-export const { setSearchQuery, addCategory, updateCategory, deleteCategory } =
-  categoriesSlice.actions;
+export const { setSearchQuery } = categoriesSlice.actions;
 
 export default categoriesSlice.reducer;

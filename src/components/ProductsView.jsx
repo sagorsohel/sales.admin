@@ -14,8 +14,8 @@ import {
 import {
   setSearchQuery,
   setCategoryFilter,
-  deleteProduct,
-  toggleProductStatus,
+  deleteProductApi,
+  toggleProductStatusApi,
 } from "../store/slices/productsSlice";
 import {
   setAddProductModalOpen,
@@ -174,7 +174,7 @@ export function ProductsView() {
                     </td>
                     <td className="px-5 py-4">
                       <button
-                        onClick={() => dispatch(toggleProductStatus(prod.id))}
+                        onClick={() => dispatch(toggleProductStatusApi(prod))}
                         className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold cursor-pointer border ${
                           prod.status === "Active"
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
@@ -206,9 +206,13 @@ export function ProductsView() {
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => {
-                            if (confirm(`Delete "${prod.name}" from Redux store?`)) {
-                              dispatch(deleteProduct(prod.id));
+                          onClick={async () => {
+                            if (confirm(`Delete "${prod.name}" from MySQL database?`)) {
+                              try {
+                                await dispatch(deleteProductApi(prod.id)).unwrap();
+                              } catch (err) {
+                                alert("Failed to delete product: " + err);
+                              }
                             }
                           }}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"

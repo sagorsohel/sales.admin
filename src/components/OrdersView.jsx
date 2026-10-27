@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { setFilterStatus, updateOrderStatus } from "../store/slices/ordersSlice";
+import { setFilterStatus, updateOrderStatusApi } from "../store/slices/ordersSlice";
 
 const statuses = ["All", "Completed", "Processing", "Pending"];
 
@@ -87,7 +87,7 @@ export function OrdersView() {
                         value={ord.status}
                         onChange={(e) =>
                           dispatch(
-                            updateOrderStatus({
+                            updateOrderStatusApi({
                               id: ord.id,
                               status: e.target.value,
                             })
