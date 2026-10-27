@@ -4,11 +4,13 @@ import { Bell, ShieldCheck, Zap } from "lucide-react";
 
 export function Header() {
   const currentTab = useSelector((state) => state.ui.currentTab);
+  const categoriesCount = useSelector((state) => state.categories.items.length);
   const productsCount = useSelector((state) => state.products.items.length);
   const ordersCount = useSelector((state) => state.orders.items.length);
 
   const titles = {
     dashboard: "Enterprise Overview",
+    categories: "Categories Management",
     products: "Product Catalog Management",
     orders: "Order Processing & Fulfillment",
     "api-monitor": "Express.js API Live Monitor",
@@ -32,6 +34,8 @@ export function Header() {
             <Zap className="w-3.5 h-3.5" />
             Redux Synced:
           </span>
+          <span className="text-gray-300 font-semibold">{categoriesCount} categories</span>
+          <span className="text-gray-500">•</span>
           <span className="text-gray-300 font-semibold">{productsCount} products</span>
           <span className="text-gray-500">•</span>
           <span className="text-gray-300 font-semibold">{ordersCount} orders</span>

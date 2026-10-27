@@ -2,6 +2,7 @@ import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   LayoutDashboard,
+  FolderTree,
   Package,
   ShoppingCart,
   Activity,
@@ -14,6 +15,7 @@ import { setCurrentTab } from "../store/slices/uiSlice";
 export function Sidebar() {
   const dispatch = useDispatch();
   const currentTab = useSelector((state) => state.ui.currentTab);
+  const categoriesCount = useSelector((state) => state.categories.items.length);
   const productsCount = useSelector((state) => state.products.items.length);
   const ordersCount = useSelector((state) => state.orders.items.length);
 
@@ -22,6 +24,12 @@ export function Sidebar() {
       id: "dashboard",
       label: "Dashboard",
       icon: <LayoutDashboard className="w-5 h-5" />,
+    },
+    {
+      id: "categories",
+      label: "Categories",
+      icon: <FolderTree className="w-5 h-5" />,
+      badge: categoriesCount,
     },
     {
       id: "products",
@@ -65,7 +73,7 @@ export function Sidebar() {
         {/* Navigation */}
         <div className="px-3 py-6 space-y-1">
           <div className="px-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
-            Management
+            Catalog & Sales
           </div>
           {navItems.map((item) => {
             const isActive = currentTab === item.id;
