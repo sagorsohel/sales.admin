@@ -76,7 +76,9 @@ export function Sidebar() {
             Catalog & Sales
           </div>
           {navItems.map((item) => {
-            const isActive = currentTab === item.id;
+            const isActive =
+              currentTab === item.id ||
+              (item.id === "products" && currentTab === "product-form");
             return (
               <button
                 key={item.id}
