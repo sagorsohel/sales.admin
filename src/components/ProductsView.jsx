@@ -21,6 +21,7 @@ import {
   setAddProductModalOpen,
   setEditingProduct,
   setActiveProductDetail,
+  setCurrentTab,
 } from "../store/slices/uiSlice";
 
 export function ProductsView() {
@@ -78,12 +79,12 @@ export function ProductsView() {
           <button
             onClick={() => {
               dispatch(setEditingProduct(null));
-              dispatch(setAddProductModalOpen(true));
+              dispatch(setCurrentTab("product-form"));
             }}
             className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-500/20 flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
-            Add Solution
+            Add Product
           </button>
         </div>
       </div>
@@ -199,8 +200,11 @@ export function ProductsView() {
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => dispatch(setEditingProduct(prod))}
-                          className="p-1.5 rounded-lg text-gray-400 hover:text-blue-400 hover:bg-[#1e2a3f] transition-colors"
+                          onClick={() => {
+                            dispatch(setEditingProduct(prod));
+                            dispatch(setCurrentTab("product-form"));
+                          }}
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-blue-400 hover:bg-[#1e2a3f] transition-colors cursor-pointer"
                           title="Edit Product"
                         >
                           <Edit2 className="w-4 h-4" />

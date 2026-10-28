@@ -7,6 +7,7 @@ import { CategoriesView } from "./components/CategoriesView";
 import { ProductsView } from "./components/ProductsView";
 import { OrdersView } from "./components/OrdersView";
 import { ApiMonitorView } from "./components/ApiMonitorView";
+import { ProductFormView } from "./components/ProductFormView";
 import { AddProductModal } from "./components/AddProductModal";
 import { CategoryModal } from "./components/CategoryModal";
 import { ProductDetailModal } from "./components/ProductDetailModal";
@@ -47,6 +48,7 @@ export default function App() {
           {currentTab === "dashboard" && <DashboardView />}
           {currentTab === "categories" && <CategoriesView />}
           {currentTab === "products" && <ProductsView />}
+          {currentTab === "product-form" && <ProductFormView />}
           {currentTab === "orders" && <OrdersView />}
           {currentTab === "api-monitor" && <ApiMonitorView />}
         </main>

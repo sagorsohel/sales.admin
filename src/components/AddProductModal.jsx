@@ -11,6 +11,12 @@ import {
   Globe,
   Tag,
   Percent,
+  Palette,
+  Truck,
+  Phone,
+  MessageCircle,
+  ListPlus,
+  ShieldCheck,
 } from "lucide-react";
 import { setAddProductModalOpen } from "../store/slices/uiSlice";
 import {
@@ -24,25 +30,42 @@ export function AddProductModal() {
   const editingProduct = useSelector((state) => state.ui.editingProduct);
   const categories = useSelector((state) => state.categories.items);
 
-  // Form states
+  // Form states - Basic Info
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
+  const [brand, setBrand] = useState("Prestige");
   const [description, setDescription] = useState("");
   const [regularPrice, setRegularPrice] = useState("");
   const [salePrice, setSalePrice] = useState("");
   const [stock, setStock] = useState("50");
-  const [featuredImage, setFeaturedImage] = useState("");
   const [icon, setIcon] = useState("📦");
 
-  // Gallery Images Array
+  // Delivery & Contact
+  const [deliveryInside, setDeliveryInside] = useState("60");
+  const [deliveryOutside, setDeliveryOutside] = useState("120");
+  const [phoneNumber, setPhoneNumber] = useState("0123456789");
+  const [whatsappNumber, setWhatsappNumber] = useState("880123456789");
+
+  // Media
+  const [featuredImage, setFeaturedImage] = useState("");
   const [galleryImages, setGalleryImages] = useState([]);
   const [newGalleryUrl, setNewGalleryUrl] = useState("");
+
+  // Color Variants Array [{ name, slug, image }]
+  const [variants, setVariants] = useState([]);
+  const [newVariantName, setNewVariantName] = useState("");
+  const [newVariantSlug, setNewVariantSlug] = useState("");
+  const [newVariantImage, setNewVariantImage] = useState("");
+
+  // Key Features (মূল বৈশিষ্ট্যসমূহ)
+  const [keyFeatures, setKeyFeatures] = useState([]);
+  const [newKeyFeature, setNewKeyFeature] = useState("");
 
   // Benefits (উপকারিতা) Array
   const [benefits, setBenefits] = useState([]);
   const [newBenefit, setNewBenefit] = useState("");
 
-  // Facilities (সুবিধাসমূহ) Array
+  // Facilities (প্যাকেজে যা যা থাকছে / সুবিধাসমূহ) Array
   const [facilities, setFacilities] = useState([]);
   const [newFacility, setNewFacility] = useState("");
 
@@ -53,21 +76,32 @@ export function AddProductModal() {
   const [isCustomSeo, setIsCustomSeo] = useState(false);
 
   // Active section tab in modal
-  const [activeTab, setActiveTab] = useState("basic"); // 'basic' | 'media' | 'benefits' | 'seo'
+  const [activeTab, setActiveTab] = useState("basic"); // 'basic' | 'media' | 'variants' | 'features' | 'seo'
 
   // Pre-fill on editing or reset on add
   useEffect(() => {
     if (editingProduct) {
       setName(editingProduct.name || "");
       setCategory(editingProduct.category || (categories[0]?.name || ""));
+      setBrand(editingProduct.brand || "Prestige");
       setDescription(editingProduct.description || "");
       setRegularPrice(editingProduct.regularPrice ? String(editingProduct.regularPrice) : "");
       setSalePrice(editingProduct.salePrice ? String(editingProduct.salePrice) : "");
       setStock(editingProduct.stock !== undefined ? String(editingProduct.stock) : "50");
       setFeaturedImage(editingProduct.featuredImage || "");
-      setGalleryImages(editingProduct.galleryImages || []);
-      setBenefits(editingProduct.benefits || []);
-      setFacilities(editingProduct.facilities || []);
+      setGalleryImages(Array.isArray(editingProduct.galleryImages) ? editingProduct.galleryImages : []);
+      setVariants(Array.isArray(editingProduct.variants) ? editingProduct.variants : []);
+      setKeyFeatures(Array.isArray(editingProduct.keyFeatures) ? editingProduct.keyFeatures : []);
+      setBenefits(Array.isArray(editingProduct.benefits) ? editingProduct.benefits : []);
+      setFacilities(Array.isArray(editingProduct.facilities) ? editingProduct.facilities : []);
+      setDeliveryInside(
+        editingProduct.deliveryInside !== undefined ? String(editingProduct.deliveryInside) : "60"
+      );
+      setDeliveryOutside(
+        editingProduct.deliveryOutside !== undefined ? String(editingProduct.deliveryOutside) : "120"
+      );
+      setPhoneNumber(editingProduct.phoneNumber || "0123456789");
+      setWhatsappNumber(editingProduct.whatsappNumber || "880123456789");
       setSeoTitle(editingProduct.seoTitle || "");
       setSeoDescription(editingProduct.seoDescription || "");
       setSeoImage(editingProduct.seoImage || "");
@@ -75,29 +109,47 @@ export function AddProductModal() {
       setIsCustomSeo(true);
     } else {
       setName("");
-      setCategory(categories[0]?.name || "Cloud Solutions");
+      setCategory(categories[0]?.name || "Kitchen & Home");
+      setBrand("Prestige");
       setDescription("");
       setRegularPrice("");
       setSalePrice("");
       setStock("50");
-      setFeaturedImage("https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80");
+      setFeaturedImage("/products/cooker-blue-main.png");
       setGalleryImages([
-        "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&auto=format&fit=crop&q=80"
+        "/products/thumb-red.png",
+        "/products/cooker-blue-main.png",
+        "/products/thumb-yellow.png",
+        "/products/thumb-green.png",
+      ]);
+      setVariants([
+        { name: "Yellow (হলুদ)", slug: "yellow", image: "/products/thumb-yellow.png" },
+        { name: "Sky Blue (আকাশী নীল)", slug: "sky-blue", image: "/products/cooker-blue-main.png" },
+      ]);
+      setKeyFeatures([
+        "মডেল: Prestige Mukti Multi Purpose Cooker (3.0L)",
+        "পাওয়ার: 1500 Watt",
+        "ধারণক্ষমতা: ৩.০ লিটার",
+        "ওয়ারেন্টি: ১২ মাসের সার্ভিস ওয়ারেন্টি",
       ]);
       setBenefits([
-        "উচ্চ কর্মক্ষমতা এবং ৯৯.৯% আপটাইম নিশ্চয়তা",
-        "স্বয়ংক্রিয় ক্লাউড ব্যাকআপ সিস্টেম",
-        "সহজ ইনস্টলেশন এবং কনফিগারেশন"
+        "মাল্টি-ফাংশনাল: নুডলস, স্যুপ বা স্টিমার দিয়ে সবজি সেদ্ধ করা যায়",
+        "নন-স্টিক ইনার পট: খাবার পুড়ে লেগে যায় না এবং সহজে পরিষ্কার হয়",
+        "১৫০০ ওয়াট শক্তিশালী মোটর দ্রুত রান্না নিশ্চিত করে",
       ]);
       setFacilities([
-        "২৪/৭ লাইভ চ্যাট ও ফোন কল সাপোর্ট",
-        "৩০ দিনের শর্তহীন মানি-ব্যাক গ্যারান্টি",
-        "ফ্রি আপগ্রেড এবং সিকিউরিটি প্যাচ"
+        "১টি মেইন কুকিং ইউনিট (৩.০ লিটার)",
+        "১টি স্টিমার পট (ভাপে রান্নার জন্য)",
+        "১টি ট্রান্সপারেন্ট গ্লাস লিড এবং মেজারিং কাপ",
       ]);
+      setDeliveryInside("60");
+      setDeliveryOutside("120");
+      setPhoneNumber("0123456789");
+      setWhatsappNumber("880123456789");
       setSeoTitle("");
       setSeoDescription("");
       setSeoImage("");
-      setIcon("📦");
+      setIcon("🍲");
       setIsCustomSeo(false);
     }
   }, [editingProduct, isOpen, categories]);
@@ -111,13 +163,15 @@ export function AddProductModal() {
       : 0;
 
   // Auto SEO values
-  const computedSeoTitle = isCustomSeo && seoTitle ? seoTitle : name ? `${name} | WideTech Enterprise` : "Product Title | WideTech";
-  const computedSeoDesc = isCustomSeo && seoDescription ? seoDescription : description ? description.slice(0, 160) : "Discover enterprise solutions with WideTech.";
+  const computedSeoTitle =
+    isCustomSeo && seoTitle ? seoTitle : name ? `${name} | WideTech Enterprise` : "Product Title | WideTech";
+  const computedSeoDesc =
+    isCustomSeo && seoDescription ? seoDescription : description ? description.slice(0, 160) : "Discover quality products at best price.";
   const computedSeoImage = isCustomSeo && seoImage ? seoImage : featuredImage || "";
 
   if (!isOpen) return null;
 
-  // Add / Remove Gallery Image
+  // Gallery handlers
   const handleAddGalleryImage = () => {
     if (newGalleryUrl.trim()) {
       setGalleryImages([...galleryImages, newGalleryUrl.trim()]);
@@ -128,33 +182,61 @@ export function AddProductModal() {
     setGalleryImages(galleryImages.filter((_, i) => i !== index));
   };
 
-  // Add / Edit / Remove Benefits
+  // Color Variant handlers
+  const handleAddVariant = () => {
+    if (newVariantName.trim()) {
+      const slug =
+        newVariantSlug.trim() ||
+        newVariantName
+          .toLowerCase()
+          .trim()
+          .replace(/[^\w\s-]/g, "")
+          .replace(/[\s_-]+/g, "-");
+      setVariants([
+        ...variants,
+        {
+          name: newVariantName.trim(),
+          slug: slug || `var-${Date.now()}`,
+          image: newVariantImage.trim() || featuredImage || "/products/thumb-yellow.png",
+        },
+      ]);
+      setNewVariantName("");
+      setNewVariantSlug("");
+      setNewVariantImage("");
+    }
+  };
+  const handleRemoveVariant = (index) => {
+    setVariants(variants.filter((_, i) => i !== index));
+  };
+
+  // Key Feature handlers
+  const handleAddKeyFeature = () => {
+    if (newKeyFeature.trim()) {
+      setKeyFeatures([...keyFeatures, newKeyFeature.trim()]);
+      setNewKeyFeature("");
+    }
+  };
+  const handleRemoveKeyFeature = (index) => {
+    setKeyFeatures(keyFeatures.filter((_, i) => i !== index));
+  };
+
+  // Benefits handlers
   const handleAddBenefit = () => {
     if (newBenefit.trim()) {
       setBenefits([...benefits, newBenefit.trim()]);
       setNewBenefit("");
     }
   };
-  const handleUpdateBenefit = (index, val) => {
-    const updated = [...benefits];
-    updated[index] = val;
-    setBenefits(updated);
-  };
   const handleRemoveBenefit = (index) => {
     setBenefits(benefits.filter((_, i) => i !== index));
   };
 
-  // Add / Edit / Remove Facilities
+  // Facilities handlers
   const handleAddFacility = () => {
     if (newFacility.trim()) {
       setFacilities([...facilities, newFacility.trim()]);
       setNewFacility("");
     }
-  };
-  const handleUpdateFacility = (index, val) => {
-    const updated = [...facilities];
-    updated[index] = val;
-    setFacilities(updated);
   };
   const handleRemoveFacility = (index) => {
     setFacilities(facilities.filter((_, i) => i !== index));
@@ -173,7 +255,8 @@ export function AddProductModal() {
 
     const payload = {
       name: name.trim(),
-      category: category || categories[0]?.name || "General",
+      category: category || categories[0]?.name || "Kitchen & Home",
+      brand: brand.trim() || "Prestige",
       description: description.trim(),
       regularPrice: numRegular > 0 ? numRegular : numSale,
       salePrice: numSale,
@@ -181,8 +264,14 @@ export function AddProductModal() {
       stock: parseInt(stock, 10) || 0,
       featuredImage: featuredImage.trim(),
       galleryImages,
+      variants,
+      keyFeatures,
       benefits,
       facilities,
+      deliveryInside: Number(deliveryInside) || 60,
+      deliveryOutside: Number(deliveryOutside) || 120,
+      phoneNumber: phoneNumber.trim() || "0123456789",
+      whatsappNumber: whatsappNumber.trim() || "880123456789",
       seoTitle: computedSeoTitle,
       seoDescription: computedSeoDesc,
       seoImage: computedSeoImage,
@@ -205,7 +294,7 @@ export function AddProductModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
-      <div className="w-full max-w-3xl bg-[#111827] border border-[#1f293d] rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95">
+      <div className="w-full max-w-4xl bg-[#111827] border border-[#1f293d] rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-[#1f293d] bg-[#0d131f]">
           <div className="flex items-center gap-2.5">
@@ -214,10 +303,10 @@ export function AddProductModal() {
             </div>
             <div>
               <h3 className="font-bold text-white text-base">
-                {editingProduct ? "Edit Product Details" : "Create New Enterprise Solution"}
+                {editingProduct ? "Edit Product Details" : "Create New Product"}
               </h3>
               <p className="text-xs text-gray-400">
-                Configure pricing, media gallery, benefits, facilities & auto SEO
+                Configure pricing, variants, features, delivery, WhatsApp & descriptions
               </p>
             </div>
           </div>
@@ -230,17 +319,18 @@ export function AddProductModal() {
         </div>
 
         {/* Tab Navigation inside modal */}
-        <div className="flex border-b border-[#1f293d] px-6 bg-[#0e1522]">
+        <div className="flex border-b border-[#1f293d] px-6 bg-[#0e1522] overflow-x-auto">
           {[
             { id: "basic", label: "1. Info & Pricing" },
             { id: "media", label: "2. Images & Gallery" },
-            { id: "benefits", label: "3. উপকারিতা & সুবিধাসমূহ" },
-            { id: "seo", label: "4. Auto SEO Engine" },
+            { id: "variants", label: "3. Color Variants (কালার)" },
+            { id: "features", label: "4. Features & প্যাকেজ" },
+            { id: "seo", label: "5. Auto SEO Engine" },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-3 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
+              className={`px-4 py-3 text-xs font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === tab.id
                   ? "border-blue-500 text-blue-400 bg-blue-500/5"
                   : "border-transparent text-gray-400 hover:text-gray-200"
@@ -263,14 +353,14 @@ export function AddProductModal() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Enterprise Cloud Suite Pro"
+                  placeholder="e.g. Prestige 3.0L Multi Purpose Cooker"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-lg bg-[#0d131f] border border-[#1f293d] text-white text-sm focus:outline-none focus:border-blue-500"
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">
                     Category (ক্যাটাগরি) *
@@ -281,7 +371,7 @@ export function AddProductModal() {
                     className="w-full px-3.5 py-2.5 rounded-lg bg-[#0d131f] border border-[#1f293d] text-white text-sm focus:outline-none focus:border-blue-500"
                   >
                     {categories.length === 0 ? (
-                      <option value="">No categories created yet</option>
+                      <option value="Kitchen & Home">Kitchen & Home</option>
                     ) : (
                       categories.map((c) => (
                         <option key={c.id} value={c.name}>
@@ -294,7 +384,20 @@ export function AddProductModal() {
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">
-                    Stock Inventory Units
+                    Brand (ব্র্যান্ডের নাম)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Prestige"
+                    value={brand}
+                    onChange={(e) => setBrand(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#0d131f] border border-[#1f293d] text-white text-sm focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">
+                    Stock Quantity (মজুত সংখ্যা)
                   </label>
                   <input
                     type="number"
@@ -325,13 +428,13 @@ export function AddProductModal() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-gray-400 mb-1">
-                      Regular Price (আগের প্রাইস $)
+                      Regular Price (আগের প্রাইস ৳)
                     </label>
                     <input
                       type="number"
                       min="0"
                       step="any"
-                      placeholder="e.g. 399"
+                      placeholder="e.g. 1499"
                       value={regularPrice}
                       onChange={(e) => setRegularPrice(e.target.value)}
                       className="w-full px-3.5 py-2 rounded-lg bg-[#090e17] border border-[#1f293d] text-white text-sm focus:outline-none focus:border-blue-500"
@@ -340,35 +443,95 @@ export function AddProductModal() {
 
                   <div>
                     <label className="block text-xs font-medium text-gray-400 mb-1">
-                      Sale Price (এখন প্রাইস $) *
+                      Sale Price (এখন অফার প্রাইস ৳) *
                     </label>
                     <input
                       type="number"
                       required
                       min="0"
                       step="any"
-                      placeholder="e.g. 299"
+                      placeholder="e.g. 999"
                       value={salePrice}
                       onChange={(e) => setSalePrice(e.target.value)}
-                      className="w-full px-3.5 py-2 rounded-lg bg-[#090e17] border border-[#1f293d] text-white text-sm focus:outline-none focus:border-blue-500 font-bold text-blue-400"
+                      className="w-full px-3.5 py-2 rounded-lg bg-[#090e17] border border-[#1f293d] text-white text-sm focus:outline-none focus:border-blue-500 font-bold text-emerald-400"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Delivery & Order Contact */}
+              <div className="p-4 rounded-xl bg-[#0e1624] border border-[#1f293d] space-y-3">
+                <span className="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-1.5">
+                  <Truck className="w-3.5 h-3.5 text-blue-400" />
+                  ডেলিভারি চার্জ ও কন্টাক্ট ইনফরমেশন
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1">
+                      ঢাকা সিটির ভেতরে চার্জ (৳)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={deliveryInside}
+                      onChange={(e) => setDeliveryInside(e.target.value)}
+                      className="w-full px-3.5 py-2 rounded-lg bg-[#090e17] border border-[#1f293d] text-white text-sm focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1">
+                      ঢাকা সিটির বাইরে চার্জ (৳)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={deliveryOutside}
+                      onChange={(e) => setDeliveryOutside(e.target.value)}
+                      className="w-full px-3.5 py-2 rounded-lg bg-[#090e17] border border-[#1f293d] text-white text-sm focus:outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
 
-                <p className="text-[11px] text-gray-400">
-                  {numRegular > numSale
-                    ? `গ্রাহক $${numRegular - numSale} বাঁচাবেন (${discountPercent}% ছাড় পেয়ে)।`
-                    : "আগের এবং বর্তমান প্রাইস একই হলে কোনো ছাড় ডিসপ্লে হবে না।"}
-                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1 flex items-center gap-1">
+                      <Phone className="w-3 h-3 text-blue-400" />
+                      কল করার মোবাইল নাম্বার
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="0123456789"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      className="w-full px-3.5 py-2 rounded-lg bg-[#090e17] border border-[#1f293d] text-white text-sm focus:outline-none focus:border-blue-500 font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1 flex items-center gap-1">
+                      <MessageCircle className="w-3 h-3 text-emerald-400" />
+                      হোয়াটসঅ্যাপ নাম্বার (Country Code সহ)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="880123456789"
+                      value={whatsappNumber}
+                      onChange={(e) => setWhatsappNumber(e.target.value)}
+                      className="w-full px-3.5 py-2 rounded-lg bg-[#090e17] border border-[#1f293d] text-white text-sm focus:outline-none focus:border-blue-500 font-mono"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">
-                  Detailed Description (বিবরণ)
+                  Detailed Description (মূল বিবরণ)
                 </label>
                 <textarea
                   rows={3}
-                  placeholder="Comprehensive description of capabilities, features, and specs..."
+                  placeholder="পণ্যটির বিস্তারিত বিবরণ এখানে লিখুন..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-lg bg-[#0d131f] border border-[#1f293d] text-white text-sm focus:outline-none focus:border-blue-500 resize-none leading-relaxed"
@@ -380,29 +543,25 @@ export function AddProductModal() {
           {/* TAB 2: MEDIA & GALLERY */}
           {activeTab === "media" && (
             <div className="space-y-5">
-              {/* Featured Image */}
               <div>
                 <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">
-                  Featured Image URL (ফিচার ইমেজ)
+                  Featured Image URL (ফিচার্ড ইমেজ)
                 </label>
                 <div className="flex gap-2">
                   <input
-                    type="url"
-                    placeholder="https://images.unsplash.com/photo-..."
+                    type="text"
+                    placeholder="/products/cooker-blue-main.png বা https://..."
                     value={featuredImage}
                     onChange={(e) => setFeaturedImage(e.target.value)}
                     className="flex-1 px-3.5 py-2.5 rounded-lg bg-[#0d131f] border border-[#1f293d] text-white text-sm focus:outline-none focus:border-blue-500"
                   />
                 </div>
                 {featuredImage && (
-                  <div className="mt-2 relative w-32 h-20 rounded-lg overflow-hidden border border-[#1f293d] bg-black">
+                  <div className="mt-2 relative w-24 h-24 rounded-lg overflow-hidden border border-[#1f293d] bg-white p-1">
                     <img
                       src={featuredImage}
                       alt="Featured Preview"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.style.display = "none";
-                      }}
+                      className="w-full h-full object-contain"
                     />
                   </div>
                 )}
@@ -422,8 +581,8 @@ export function AddProductModal() {
 
                 <div className="flex gap-2">
                   <input
-                    type="url"
-                    placeholder="Paste another gallery image URL..."
+                    type="text"
+                    placeholder="আরেকটি ইমেজ URL পেস্ট করুন..."
                     value={newGalleryUrl}
                     onChange={(e) => setNewGalleryUrl(e.target.value)}
                     className="flex-1 px-3.5 py-2 rounded-lg bg-[#090e17] border border-[#1f293d] text-white text-xs focus:outline-none focus:border-blue-500"
@@ -431,7 +590,7 @@ export function AddProductModal() {
                   <button
                     type="button"
                     onClick={handleAddGalleryImage}
-                    className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                    className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     Add
@@ -443,19 +602,19 @@ export function AddProductModal() {
                     {galleryImages.map((img, i) => (
                       <div
                         key={i}
-                        className="relative group rounded-lg overflow-hidden border border-[#23334d] h-20 bg-black"
+                        className="relative group rounded-lg overflow-hidden border border-[#23334d] h-24 bg-white p-1"
                       >
                         <img
                           src={img}
                           alt={`Gallery ${i + 1}`}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain"
                         />
                         <button
                           type="button"
                           onClick={() => handleRemoveGalleryImage(i)}
-                          className="absolute top-1 right-1 p-1 rounded-full bg-red-600/80 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-1 right-1 p-1 rounded-md bg-red-600/90 text-white opacity-0 group-hover:opacity-100 transition-opacity"
                         >
-                          <Trash2 className="w-3 h-3" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     ))}
@@ -465,25 +624,173 @@ export function AddProductModal() {
             </div>
           )}
 
-          {/* TAB 3: BENEFITS & FACILITIES */}
-          {activeTab === "benefits" && (
-            <div className="space-y-6">
-              {/* Benefits (উপকারিতা) */}
+          {/* TAB 3: COLOR VARIANTS */}
+          {activeTab === "variants" && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-xl bg-[#0e1624] border border-[#1f293d] space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-1.5">
+                    <Palette className="w-4 h-4 text-pink-400" />
+                    Product Color Variants (কালার অপশনস)
+                  </span>
+                  <span className="text-xs text-gray-400 font-mono">
+                    {variants.length} variants
+                  </span>
+                </div>
+
+                {/* Add new variant inputs */}
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-[#090e17] p-3 rounded-lg border border-[#1f293d]">
+                  <div className="sm:col-span-4">
+                    <label className="block text-[11px] text-gray-400 mb-1">Color Name (যেমন: Sky Blue)</label>
+                    <input
+                      type="text"
+                      placeholder="Sky Blue (আকাশী নীল)"
+                      value={newVariantName}
+                      onChange={(e) => setNewVariantName(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded-md bg-[#0d131f] border border-[#23334d] text-white text-xs focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="sm:col-span-3">
+                    <label className="block text-[11px] text-gray-400 mb-1">Slug (যেমন: sky-blue)</label>
+                    <input
+                      type="text"
+                      placeholder="sky-blue"
+                      value={newVariantSlug}
+                      onChange={(e) => setNewVariantSlug(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded-md bg-[#0d131f] border border-[#23334d] text-white text-xs focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="sm:col-span-3">
+                    <label className="block text-[11px] text-gray-400 mb-1">Image URL</label>
+                    <input
+                      type="text"
+                      placeholder="/products/cooker-blue-main.png"
+                      value={newVariantImage}
+                      onChange={(e) => setNewVariantImage(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded-md bg-[#0d131f] border border-[#23334d] text-white text-xs focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="sm:col-span-2 flex items-end">
+                    <button
+                      type="button"
+                      onClick={handleAddVariant}
+                      className="w-full py-1.5 px-3 rounded-md bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add
+                    </button>
+                  </div>
+                </div>
+
+                {/* Variants List */}
+                <div className="space-y-2 pt-1">
+                  {variants.length === 0 ? (
+                    <p className="text-xs text-gray-500 italic text-center py-4">
+                      কোনো কালার ভ্যারিয়েন্ট যোগ করা হয়নি। উপরে ফর্ম ব্যবহার করে কালার যোগ করুন।
+                    </p>
+                  ) : (
+                    variants.map((v, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between p-2.5 rounded-lg bg-[#090e17] border border-[#1f293d]"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-md overflow-hidden bg-white border border-gray-300 p-0.5 flex items-center justify-center">
+                            <img
+                              src={v.image || "/products/thumb-yellow.png"}
+                              alt={v.name}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-white">{v.name}</div>
+                            <div className="text-[11px] text-gray-400 font-mono">slug: {v.slug}</div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveVariant(idx)}
+                          className="p-1.5 rounded-md text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: FEATURES, BENEFITS & PACKAGE */}
+          {activeTab === "features" && (
+            <div className="space-y-5">
+              {/* KEY FEATURES */}
               <div className="p-4 rounded-xl bg-[#0e1624] border border-[#1f293d] space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-1.5">
-                    <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-                    উপকারিতা সমূহ (Benefits List)
+                    <ListPlus className="w-3.5 h-3.5 text-blue-400" />
+                    Key Features (মূল স্পেসিফিকেশন ও ফিচার্স)
                   </span>
-                  <span className="text-xs text-gray-400">
-                    {benefits.length} items
+                  <span className="text-xs text-gray-400 font-mono">
+                    {keyFeatures.length} features
                   </span>
                 </div>
 
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="উপকারিতা লিখুন (যেমন: ১০০% খাঁটি উপাদান, ইত্যাদি)..."
+                    placeholder="যেমন: মডেল: Prestige 3.0L বা ধারণক্ষমতা: ৩ লিটার..."
+                    value={newKeyFeature}
+                    onChange={(e) => setNewKeyFeature(e.target.value)}
+                    className="flex-1 px-3.5 py-2 rounded-lg bg-[#090e17] border border-[#1f293d] text-white text-xs focus:outline-none focus:border-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddKeyFeature}
+                    className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Add
+                  </button>
+                </div>
+
+                <div className="space-y-2 pt-1">
+                  {keyFeatures.map((feat, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-2.5 rounded-lg bg-[#090e17] border border-[#1f293d] text-xs text-gray-200"
+                    >
+                      <span>{feat}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveKeyFeature(idx)}
+                        className="text-red-400 hover:text-red-300 p-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* BENEFITS (কেন এটি আপনার পছন্দের তালিকায় থাকবে?) */}
+              <div className="p-4 rounded-xl bg-[#0e1624] border border-[#1f293d] space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                    কেন এটি আপনার পছন্দের তালিকায় থাকবে? (উপকারিতা)
+                  </span>
+                  <span className="text-xs text-gray-400 font-mono">
+                    {benefits.length} points
+                  </span>
+                </div>
+
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="যেমন: মাল্টি-ফাংশনাল: রান্না ও সেদ্ধ একসাথে করা যায়..."
                     value={newBenefit}
                     onChange={(e) => setNewBenefit(e.target.value)}
                     className="flex-1 px-3.5 py-2 rounded-lg bg-[#090e17] border border-[#1f293d] text-white text-xs focus:outline-none focus:border-blue-500"
@@ -502,21 +809,13 @@ export function AddProductModal() {
                   {benefits.map((b, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 p-2 rounded-lg bg-[#121c2b] border border-[#1f2f47]"
+                      className="flex items-center justify-between p-2.5 rounded-lg bg-[#090e17] border border-[#1f293d] text-xs text-gray-200"
                     >
-                      <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs flex items-center justify-center font-bold shrink-0">
-                        {idx + 1}
-                      </span>
-                      <input
-                        type="text"
-                        value={b}
-                        onChange={(e) => handleUpdateBenefit(idx, e.target.value)}
-                        className="flex-1 bg-transparent text-gray-200 text-xs focus:outline-none"
-                      />
+                      <span>• {b}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveBenefit(idx)}
-                        className="p-1 rounded text-gray-400 hover:text-red-400 hover:bg-red-500/10"
+                        className="text-red-400 hover:text-red-300 p-1"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -525,14 +824,14 @@ export function AddProductModal() {
                 </div>
               </div>
 
-              {/* Facilities (সুবিধাসমূহ) */}
+              {/* FACILITIES / PACKAGE (প্যাকেজে যা যা থাকছে) */}
               <div className="p-4 rounded-xl bg-[#0e1624] border border-[#1f293d] space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-                    সুবিধাসমূহ (Facilities List)
+                    <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+                    প্যাকেজে যা যা থাকছে / বিশেষ সুবিধাসমূহ
                   </span>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-gray-400 font-mono">
                     {facilities.length} items
                   </span>
                 </div>
@@ -540,7 +839,7 @@ export function AddProductModal() {
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="সুবিধা লিখুন (যেমন: ফ্রি হোম ডেলিভারি, ৭ দিনের রিটার্ন পলিসি)..."
+                    placeholder="যেমন: ১টি মেইন কুকিং ইউনিট (৩.০ লিটার)..."
                     value={newFacility}
                     onChange={(e) => setNewFacility(e.target.value)}
                     className="flex-1 px-3.5 py-2 rounded-lg bg-[#090e17] border border-[#1f293d] text-white text-xs focus:outline-none focus:border-blue-500"
@@ -556,24 +855,16 @@ export function AddProductModal() {
                 </div>
 
                 <div className="space-y-2 pt-1">
-                  {facilities.map((f, idx) => (
+                  {facilities.map((fac, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 p-2 rounded-lg bg-[#121c2b] border border-[#1f2f47]"
+                      className="flex items-center justify-between p-2.5 rounded-lg bg-[#090e17] border border-[#1f293d] text-xs text-gray-200"
                     >
-                      <span className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 text-xs flex items-center justify-center font-bold shrink-0">
-                        {idx + 1}
-                      </span>
-                      <input
-                        type="text"
-                        value={f}
-                        onChange={(e) => handleUpdateFacility(idx, e.target.value)}
-                        className="flex-1 bg-transparent text-gray-200 text-xs focus:outline-none"
-                      />
+                      <span>✔ {fac}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveFacility(idx)}
-                        className="p-1 rounded text-gray-400 hover:text-red-400 hover:bg-red-500/10"
+                        className="text-red-400 hover:text-red-300 p-1"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -584,124 +875,87 @@ export function AddProductModal() {
             </div>
           )}
 
-          {/* TAB 4: AUTO SEO ENGINE */}
+          {/* TAB 5: SEO ENGINE */}
           {activeTab === "seo" && (
             <div className="space-y-5">
-              <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-300 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-blue-400 shrink-0" />
-                  <span>
-                    এসইও টাইটেল, ডেসক্রিপশন এবং ইমেজ স্বয়ংক্রিয়ভাবে প্রডাক্টের নাম, বিবরণ ও ফিচার ইমেজ থেকে নিয়ে নেওয়া হয়েছে। চাইলে কাস্টমাইজ করতে পারেন।
+              <div className="p-4 rounded-xl bg-[#0e1624] border border-[#1f293d] space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-blue-400" />
+                    Search Engine Optimization
                   </span>
+                  <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-300">
+                    <input
+                      type="checkbox"
+                      checked={isCustomSeo}
+                      onChange={(e) => setIsCustomSeo(e.target.checked)}
+                      className="rounded bg-[#0d131f] border-gray-600 text-blue-600 focus:ring-0"
+                    />
+                    <span>Custom SEO Meta</span>
+                  </label>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsCustomSeo(!isCustomSeo)}
-                  className="px-2.5 py-1 rounded-md bg-blue-600/30 text-blue-200 hover:bg-blue-600/50 text-[11px] font-semibold whitespace-nowrap cursor-pointer"
-                >
-                  {isCustomSeo ? "Auto Reset" : "Customize"}
-                </button>
-              </div>
 
-              {/* Live Google Search Card Preview */}
-              <div className="p-4 rounded-xl bg-[#090d16] border border-[#1f293d] space-y-1">
-                <div className="text-[11px] text-gray-400 font-mono mb-2 flex items-center gap-1.5">
-                  <Search className="w-3 h-3 text-emerald-400" />
-                  Google SERP Snippet Preview:
-                </div>
-                <div className="text-[12px] text-gray-400 truncate">
-                  https://sales.widetech.io/products/
-                  {name
-                    ? name
-                        .toLowerCase()
-                        .replace(/[^\w\s-]/g, "")
-                        .replace(/[\s_-]+/g, "-")
-                    : "product-slug"}
-                </div>
-                <h4 className="text-sm font-semibold text-[#8ab4f8] hover:underline cursor-pointer truncate">
-                  {computedSeoTitle}
-                </h4>
-                <p className="text-xs text-[#bdc1c6] line-clamp-2 leading-relaxed">
-                  {computedSeoDescription}
-                </p>
-              </div>
-
-              {/* SEO Inputs */}
-              <div className="space-y-4 pt-2">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">
-                    SEO Meta Title (অটো জেনারেটেড)
+                  <label className="block text-xs font-medium text-gray-400 mb-1">
+                    Meta Title
                   </label>
                   <input
                     type="text"
-                    value={computedSeoTitle}
-                    onChange={(e) => {
-                      setIsCustomSeo(true);
-                      setSeoTitle(e.target.value);
-                    }}
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#0d131f] border border-[#1f293d] text-white text-sm focus:outline-none focus:border-blue-500"
+                    disabled={!isCustomSeo}
+                    placeholder="Auto generated from Title..."
+                    value={isCustomSeo ? seoTitle : computedSeoTitle}
+                    onChange={(e) => setSeoTitle(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-lg bg-[#090e17] border border-[#1f293d] text-white text-xs focus:outline-none focus:border-blue-500 disabled:opacity-50"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">
-                    SEO Meta Description (অটো জেনারেটেড)
+                  <label className="block text-xs font-medium text-gray-400 mb-1">
+                    Meta Description
                   </label>
                   <textarea
                     rows={2}
-                    value={computedSeoDescription}
-                    onChange={(e) => {
-                      setIsCustomSeo(true);
-                      setSeoDescription(e.target.value);
-                    }}
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#0d131f] border border-[#1f293d] text-white text-sm focus:outline-none focus:border-blue-500 resize-none"
+                    disabled={!isCustomSeo}
+                    placeholder="Auto generated from Description..."
+                    value={isCustomSeo ? seoDescription : computedSeoDesc}
+                    onChange={(e) => setSeoDescription(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-lg bg-[#090e17] border border-[#1f293d] text-white text-xs focus:outline-none focus:border-blue-500 disabled:opacity-50 resize-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">
-                    SEO Social Share Image (OG Image)
+                  <label className="block text-xs font-medium text-gray-400 mb-1">
+                    Social Share Image
                   </label>
                   <input
-                    type="url"
-                    value={computedSeoImage}
-                    onChange={(e) => {
-                      setIsCustomSeo(true);
-                      setSeoImage(e.target.value);
-                    }}
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#0d131f] border border-[#1f293d] text-white text-sm focus:outline-none focus:border-blue-500"
+                    type="text"
+                    disabled={!isCustomSeo}
+                    placeholder="Auto generated from Featured Image..."
+                    value={isCustomSeo ? seoImage : computedSeoImage}
+                    onChange={(e) => setSeoImage(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-lg bg-[#090e17] border border-[#1f293d] text-white text-xs focus:outline-none focus:border-blue-500 disabled:opacity-50"
                   />
                 </div>
               </div>
             </div>
           )}
 
-          {/* Footer Save & Actions */}
-          <div className="pt-4 border-t border-[#1f293d] flex items-center justify-between">
-            <div className="text-xs text-gray-400">
-              {discountPercent > 0 && (
-                <span className="text-emerald-400 font-semibold">
-                  {discountPercent}% Discount Applied
-                </span>
-              )}
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => dispatch(setAddProductModalOpen(false))}
-                className="px-4 py-2 rounded-lg bg-[#151f32] text-gray-300 text-xs font-medium hover:bg-[#1b2740] transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-500/30 transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                {editingProduct ? "Update Solution in Redux" : "Save Solution to Redux"}
-              </button>
-            </div>
+          {/* Action Footer */}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#1f293d]">
+            <button
+              type="button"
+              onClick={() => dispatch(setAddProductModalOpen(false))}
+              className="px-5 py-2.5 rounded-lg border border-[#1f293d] text-gray-300 hover:text-white hover:bg-[#1f293d] text-xs font-semibold transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-lg shadow-blue-500/25 flex items-center gap-1.5 cursor-pointer"
+            >
+              <CheckCircle className="w-4 h-4" />
+              {editingProduct ? "Save Changes to MySQL" : "Publish Product to MySQL"}
+            </button>
           </div>
         </form>
       </div>
