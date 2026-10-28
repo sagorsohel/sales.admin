@@ -74,13 +74,31 @@ export function OrdersView() {
                       <div className="text-xs text-gray-400">{ord.email}</div>
                     </td>
                     <td className="px-5 py-4 text-xs text-gray-200">
-                      {ord.product}
+                      <div>
+                        {ord.product ||
+                          (Array.isArray(ord.items)
+                            ? ord.items
+                                .filter((it) => !it.isDeliveryInfo)
+                                .map(
+                                  (it) =>
+                                    `${it.name || it.title || "Item"} (x${it.quantity || 1})`
+                                )
+                                .join(", ")
+                            : "Product")}
+                      </div>
+                      {Array.isArray(ord.items) &&
+                        ord.items.find((it) => it.isDeliveryInfo) && (
+                          <div className="text-[11px] text-gray-400 mt-1 flex items-center gap-1">
+                            <span>📍</span>
+                            <span>{ord.items.find((it) => it.isDeliveryInfo).deliveryAddress}</span>
+                          </div>
+                        )}
                     </td>
                     <td className="px-5 py-4 font-mono text-xs text-gray-400">
-                      {ord.date}
+                      {ord.date ? new Date(ord.date).toLocaleDateString() : "Today"}
                     </td>
                     <td className="px-5 py-4 font-bold text-white">
-                      ${ord.amount}
+                      ৳{ord.totalAmount !== undefined ? ord.totalAmount : ord.amount}
                     </td>
                     <td className="px-5 py-4">
                       <select
